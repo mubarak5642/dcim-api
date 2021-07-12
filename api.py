@@ -3,14 +3,14 @@ from functools import wraps
 from flask import request, Response, jsonify, Flask
 import sqlite3
 import pandas as pd
+import base64
 
 app = Flask(__name__)
 
 conn = sqlite3.connect('data.db')
-db = pd.read_csv('PowerIQ Data.csv')
+db = pd.read_csv('PowerIQData.csv')
 db.to_sql('power', conn, if_exists='replace', index=False)
-identity = [
-    {
+identity = {
    "data":
    {
       "type": "identity",
@@ -22,11 +22,15 @@ identity = [
       }
    }
 }
-]
 
 def check(authorization_header):
+    uname_pass = 'admin:sunbird'
+    uname_pass_bytes = uname_pass.encode('ascii')
+    base64_bytes = base64.b64encode(uname_pass_bytes)
+    base64_uname_pass = base64_bytes.decode('ascii')
+
     encoded_uname_pass = authorization_header.split()[-1]
-    if encoded_uname_pass == 'YWRtaW46c3VuYmlyZA==':
+    if encoded_uname_pass == base64_uname_pass:
         return True
 
 def auth_required(f):
