@@ -9,8 +9,7 @@ app = Flask(__name__)
 conn = sqlite3.connect('data.db')
 db = pd.read_csv('PowerIQ Data.csv')
 db.to_sql('power', conn, if_exists='replace', index=False)
-identity = [
-    {
+identity = {
    "data":
    {
       "type": "identity",
@@ -22,7 +21,6 @@ identity = [
       }
    }
 }
-]
 
 def check(authorization_header):
     encoded_uname_pass = authorization_header.split()[-1]
