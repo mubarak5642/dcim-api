@@ -1,0 +1,70 @@
+openapi: 3.0.1
+info:
+  title: DCIM POWERIQ API
+  description: 'Two types of requests will be defined in version 1.0 of the API:  identity
+    requests and monitor requests'
+  version: "1.0"
+servers:
+- url: /
+paths:
+  /:
+    get:
+      summary: 'DCIM PowerIQ API'
+      tags:
+      - "DCIM POWERIQ API"
+      operationId: get_power_class
+      responses:
+        200:
+          description: Success
+          content: {}
+        404:
+          description: Request not found 
+          content: {}
+        401:
+          description: Unauthorized Error
+  /identity:
+    get:
+      summary: 'Identity requests will be used by PIQ to identify and discover the ADS and validate the facility item credentials as configured in dcTrack/PIQ.'
+      tags:
+      - "Identity Requests"
+      operationId: get_identity_requests
+      responses:
+        200:
+          description: Success
+          content: {}
+        404:
+          description: Request not found or data not provided
+          content: {}
+        401:
+          description: Unauthorized Error
+  /monitor/sensor_readings:
+    get:
+      summary: 'Monitor requests will retrieve sensor readings for a set of server identifiers (i.e., IP addresses) passed in the request URL.' 
+      tags:
+      - "Monitor Requests"
+      operationId: get_monitor_requests
+      parameters:
+      - name: filter[server_id]
+        in: query
+        required: true
+        description: Ip Address
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Success
+          content: {}
+        400:
+          description: Error while retrieving data from PowerIQ Data
+          content: {}
+        404:
+          description: Request not found or data not provided or IP Address not found
+          content: {}
+        401:
+          description: Unauthorized Error
+          
+securityDefinitions:
+  BasicAuth:
+    type: basic
+security:
+  - basicAuth: []
