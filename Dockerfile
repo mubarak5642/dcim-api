@@ -8,9 +8,9 @@ ADD . /docker-flask
 
 RUN pip3 install -r requirements.txt
 
-EXPOSE 5001
+EXPOSE 443
 ENV FLASK_APP=api.py
 
 RUN pip3 install pandas
 
-CMD ["flask", "run", "-h", "0.0.0.0", "-p", "5001"]
+CMD ["flask", "run", "-h", "0.0.0.0", "-p", "443"]
