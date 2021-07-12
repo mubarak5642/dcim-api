@@ -1,8 +1,7 @@
 openapi: 3.0.1
 info:
   title: DCIM POWERIQ API
-  description: 'Two types of requests will be defined in version 1.0 of the API:  identity
-    requests and monitor requests'
+  description: 'Two types of requests will be defined in version 1.0 of the API:  identity requests and monitor requests'
   version: "1.0"
 servers:
 - url: /
@@ -62,9 +61,10 @@ paths:
           content: {}
         401:
           description: Unauthorized Error
-          
-securityDefinitions:
-  BasicAuth:
-    type: basic
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
 security:
   - basicAuth: []
