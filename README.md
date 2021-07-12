@@ -18,7 +18,7 @@ Run the application using following commands
 
 ```
 docker build . -t dcim-api
-docker run -p 5001:5001 -t -i dcim-api:latest
+docker run -p 443:443 -t -i dcim-api:latest
 
 ```
-check the response with localhost:5001
+check the response with localhost:443
