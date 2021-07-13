@@ -70,7 +70,7 @@ def monitor_requests():
 
     for server in servers:
         query = "SELECT * FROM power WHERE ip_addr=?"
-        result = cursor.execute(query, (server,))
+        result = cursor.execute(query, (server.strip(),))
         row = result.fetchone()
         
         if not row:
