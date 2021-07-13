@@ -100,7 +100,7 @@ paths:
                                       type: string
                                       example: "192.168.1.10"
         400:
-          descriiption: "Ip Address is required"
+          description: "Ip Address is required"
         401:
           description: Unauthorized Error
 components:
