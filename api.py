@@ -31,6 +31,8 @@ def check(authorization_header):
     if encoded_uname_pass == base64_uname_pass:
         return True
 
+    return False
+
 def auth_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -71,27 +73,28 @@ def monitor_requests():
         result = cursor.execute(query, (server,))
         row = result.fetchone()
         
-        if row:
-            new_sensor_readings.append({
-                'data': {
-                    'type': 'sensor_readings',
-                    'id': row[0],
-                    'attributes': {
-                        'active_power_watts': row[3]
-                    },
-                    'relationships': {
-                        'server': {
-                            'data': {
-                                'id': row[1]
-                            }
-                        }
-                    }
-                }
-            })
-        else:
+        if not row:
             new_sensor_readings.append(
                 {'message': 'Ip address {} not found'.format(server)}
             )
+            continue
+
+        new_sensor_readings.append({
+            'data': {
+                'type': 'sensor_readings',
+                'id': row[0],
+                'attributes': {
+                    'active_power_watts': row[3]
+                },
+                'relationships': {
+                    'server': {
+                        'data': {
+                            'id': row[1]
+                        }
+                    }
+                }
+            }
+        })
     
     return jsonify(new_sensor_readings)
 
