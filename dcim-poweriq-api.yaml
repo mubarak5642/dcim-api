@@ -1,0 +1,110 @@
+openapi: 3.0.1
+info:
+  title: DCIM POWERIQ API
+  description: 'Two types of requests will be defined in version 1.0 of the API:  identity requests and monitor requests'
+  version: "1.0"
+servers:
+- url: /
+paths:
+  /:
+    get:
+      summary: 'DCIM PowerIQ API'
+      tags:
+      - "DCIM POWERIQ API"
+      responses:
+        200:
+          description: "DCIM PowerIQ API"
+        401:
+          description: Unauthorized Error
+  /identity:
+    get:
+      summary: 'Identity requests will be used by PIQ to identify and discover the ADS and validate the facility item credentials as configured in dcTrack/PIQ.'
+      tags:
+      - "Identity Requests"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: "identity"
+                      attributes:
+                        type: object
+                        properties:
+                          api_version:
+                            type: string
+                            example: '1.0'
+                          vendor:
+                            type: string
+                            example: "Akamai"
+                          model:
+                            type: string
+                            example: "Akamai Data Store"
+        401:
+          description: Unauthorized Error
+  /monitor/sensor_readings:
+    get:
+      summary: 'Monitor requests will retrieve sensor readings for a set of server identifiers (i.e., IP addresses) passed in the request URL.' 
+      tags:
+      - "Monitor Requests"
+      parameters:
+      - name: filter[server_id]
+        in: query
+        required: true
+        description: Ip Address
+        schema:
+          type: string
+      responses:
+        200:
+          description: "Returns sensore reading else empty list"
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          example: "sensor_readings"
+                        id:
+                          type: integer
+                          example: 1
+                        attributes:
+                          type: object
+                          properties:
+                            active_power_watts:
+                              type: number
+                              example: 82.5
+                        relationships:
+                          type: object
+                          properties:
+                            server:
+                              type: object
+                              properties:
+                                data:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                      example: "192.168.1.10"
+        401:
+          description: Unauthorized Error
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []
