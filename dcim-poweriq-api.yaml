@@ -13,7 +13,7 @@ paths:
       - "DCIM POWERIQ API"
       responses:
         200:
-          description: "DCIM POWERIQ API"
+          description: "DCIM PowerIQ API"
         401:
           description: Unauthorized Error
   /identity:
