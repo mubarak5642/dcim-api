@@ -60,8 +60,11 @@ def identity_requests():
 @auth_required  
 def monitor_requests():
     server_id = request.args.get('filter[server_id]')
-    if not server_id:
-      return {'error': 'IP Address is required'}, 400
+    try:
+      if not server_id:
+        return {'error': 'IP Address is required'}, 400
+    except:
+        return {'error': 'Request not found'}, 500
 
     servers = server_id.split(',')
     new_sensor_readings = []
