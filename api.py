@@ -11,16 +11,14 @@ conn = sqlite3.connect('data.db')
 db = pd.read_csv('PowerIQData.csv')
 db.to_sql('power', conn, if_exists='replace', index=False)
 identity = {
-   "data":
-   {
-      "type": "identity",
-      "attributes":
-      {
-         "api_version" : "1.0",
-         "vendor" : "Akamai",
-         "model" : "Akamai Data Store"
-      }
-   }
+    "data": {
+        "type": "identity",
+        "attributes": {
+            "api_version" : "1.0",
+            "vendor" : "Akamai",
+            "model" : "Akamai Data Store"
+        }
+    }
 }
 
 def check(authorization_header):
@@ -60,11 +58,8 @@ def identity_requests():
 @auth_required  
 def monitor_requests():
     server_id = request.args.get('filter[server_id]')
-    try:
-      if not server_id:
-        return {'error': 'IP Address is required'}, 400
-    except:
-        return {'error': 'Request not found'}, 500
+    if not server_id:
+        return jsonify({'error': 'IP Address is required'}), 400
 
     servers = server_id.split(',')
     new_sensor_readings = []
@@ -72,29 +67,31 @@ def monitor_requests():
     cursor = connection.cursor()
 
     for server in servers:
-      query = "SELECT * FROM power WHERE ip_addr=?"
-      result = cursor.execute(query, (server,))
-      row = result.fetchone()
-      
-      if row:
-        new_sensor_readings.append({
-          'data':{
-            'type': 'sensor_readings',
-            'id': row[0],
-            'attributes': {
-                'active_power_watts': row[3]
-              },
-            'relationships':{
-              'server': {
+        query = "SELECT * FROM power WHERE ip_addr=?"
+        result = cursor.execute(query, (server,))
+        row = result.fetchone()
+        
+        if row:
+            new_sensor_readings.append({
                 'data': {
-                  'id': row[1]
-                  }
-              }
-            }
-          }
-        })
-      else:
-        new_sensor_readings.append({'message': 'Ip address {} not found'.format(server)})
+                    'type': 'sensor_readings',
+                    'id': row[0],
+                    'attributes': {
+                        'active_power_watts': row[3]
+                    },
+                    'relationships': {
+                        'server': {
+                            'data': {
+                                'id': row[1]
+                            }
+                        }
+                    }
+                }
+            })
+        else:
+            new_sensor_readings.append(
+                {'message': 'Ip address {} not found'.format(server)}
+            )
     
     return jsonify(new_sensor_readings)
 
