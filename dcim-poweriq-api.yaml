@@ -101,6 +101,14 @@ paths:
                                       example: "192.168.1.10"
         400:
           description: "Ip Address is required"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Ip Address is required"
         401:
           description: Unauthorized Error
 components:
