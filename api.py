@@ -60,9 +60,11 @@ def identity_requests():
 @auth_required  
 def monitor_requests():
     server_id = request.args.get('filter[server_id]')
+    if not server_id:
+      return {'error': 'IP Address is required'}, 400
+
     servers = server_id.split(',')
     new_sensor_readings = []
-
     connection = sqlite3.connect('data.db')
     cursor = connection.cursor()
 
@@ -73,24 +75,24 @@ def monitor_requests():
       
       if row:
         new_sensor_readings.append({
-        'data':{
-          'type': 'sensor_readings',
-          'id': row[0],
-          'attributes': {
-            'active_power_watts': row[3]
-          },
-          'relationships':{
-            'server': {
-              'data': {
-                'id': row[1]
+          'data':{
+            'type': 'sensor_readings',
+            'id': row[0],
+            'attributes': {
+                'active_power_watts': row[3]
+              },
+            'relationships':{
+              'server': {
+                'data': {
+                  'id': row[1]
+                  }
               }
             }
           }
-        }
         })
       else:
         new_sensor_readings.append({'message': 'Ip address {} not found'.format(server)})
-
+    
     return jsonify(new_sensor_readings)
 
 if __name__ == '__main__':
