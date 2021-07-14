@@ -12,5 +12,6 @@ EXPOSE 443
 ENV FLASK_APP=api.py
 
 RUN pip3 install pandas
+RUN pip3 install pyopenssl
 
-CMD ["flask", "run", "-h", "0.0.0.0", "-p", "443"]
+CMD ["flask", "run", "-h", "0.0.0.0", "-p", "443", "--cert=adhoc"]

@@ -21,4 +21,4 @@ docker build . -t dcim-api
 docker run -p 443:443 -t -i dcim-api:latest
 
 ```
-check the response with localhost:443
+check the response with https://localhost/
