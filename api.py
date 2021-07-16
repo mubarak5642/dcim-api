@@ -15,8 +15,8 @@ identity = {
         "type": "identity",
         "attributes": {
             "api_version" : "1.0",
-            "vendor" : "Akamai",
-            "model" : "Akamai Data Store"
+            "make" : "Akamai Data Store",
+            "model" : "Akamai Virtual Device"
         }
     }
 }
