@@ -41,12 +41,12 @@ paths:
                           api_version:
                             type: string
                             example: '1.0'
-                          vendor:
-                            type: string
-                            example: "Akamai"
-                          model:
+                          make:
                             type: string
                             example: "Akamai Data Store"
+                          model:
+                            type: string
+                            example: "Akamai Virtual Device"
         401:
           description: Unauthorized Error
   /monitor/sensor_readings:
