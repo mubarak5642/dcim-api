@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+
 from functools import wraps
 from flask import request, Response, jsonify, Flask
 import sqlite3
 import pandas as pd
 import base64
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -32,6 +34,79 @@ def check(authorization_header):
         return True
 
     return False
+
+def get_error_response(error):
+    return {
+        "error": "{ERROR}".format(ERROR=error)
+    }
+
+def get_rack_sensors(rack_id):
+    if rack_id == 123:
+        return [
+            {
+                "data": {
+                "type": "rack_sensor_readings",
+                "id": round(datetime.now().timestamp()),
+                "attributes": {
+                    "inlet_temperature_bottom": 30.93,
+                    "outlet_temperature_bottom": 36.5,
+                    "inlet_temperature_middle": 30.56,
+                    "outlet_temperature_middle": 35.79,
+                    "inlet_temperature_top": 30.83,
+                    "outlet_temperature_top": 86
+                },
+                "relationships": {
+                    "rack": {
+                        "data": {
+                            "id": "123"
+                        }
+                    }
+                }
+                }
+            }
+        ]
+    elif rack_id == 1234:
+        return [
+            {
+                "data": {
+                "type": "rack_sensor_readings",
+                "id": round(datetime.now().timestamp()),
+                "attributes": {
+                    "inlet_temperature_bottom": 30.93,
+                    "outlet_temperature_bottom": 36.5,
+                    "inlet_temperature_top": 30.83,
+                    "outlet_temperature_top": 86
+                },
+                "relationships": {
+                    "rack": {
+                        "data": {
+                            "id": "1234"
+                        }
+                    }
+                }
+                }
+            }
+        ]
+    elif rack_id == 12345:
+        return [
+            {
+                "data": {
+                "type": "rack_sensor_readings",
+                "id": round(datetime.now().timestamp()),
+                "attributes": {},
+                "relationships": {
+                    "rack": {
+                        "data": {
+                            "id": "1234"
+                        }
+                    }
+                }
+                }
+            }
+        ]
+    else:
+        raise ValueError("Rack with ID {}, doesn't exists".format(rack_id))
+    
 
 def auth_required(f):
     @wraps(f)
@@ -97,6 +172,31 @@ def monitor_requests():
         })
     
     return jsonify(new_sensor_readings)
+
+@app.route('/monitor/rack_sensor_readings')
+@auth_required
+def monitor_temperature_requests():
+    filter_parameter = 'filter[rack_id]'
+
+    if filter_parameter not in request.args:
+        return jsonify(get_error_response("Rack ID is required")), 400
+    
+    rack_id = request.args.get(filter_parameter)
+    if not rack_id:
+        return jsonify(get_error_response("Rack ID is required")), 400
+    
+    rack_id = rack_id.strip() 
+    try:
+        rack_id = int(rack_id)
+    except ValueError:
+        return jsonify(
+            get_error_response("Rack ID {} must be integer".format(rack_id))
+        ), 422
+    
+    try:
+        return jsonify(get_rack_sensors(rack_id))
+    except ValueError as e:
+        return jsonify(get_error_response(str(e))), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', ssl_context='adhoc')
