@@ -111,6 +111,103 @@ paths:
                     example: "Ip Address is required"
         401:
           description: Unauthorized Error
+  /monitor/rack_sensor_readings:
+    get:
+      summary: 'Monitor requests will retrieve rack sensor readings for a given dcTrack/powerIQ rack ID(now API uses dcTrack ID) passed in the request URL.' 
+      tags:
+      - "Monitor Requests"
+      parameters:
+      - name: filter[rack_id]
+        in: query
+        required: true
+        description: Rack ID
+        schema:
+          type: string
+      responses:
+        200:
+          description: "Returns rack sensor reading else empty list"
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          example: "rack_sensor_readings"
+                        id:
+                          type: integer
+                          example: 1
+                        attributes:
+                          type: object
+                          properties:
+                            inlet_temperature_bottom:
+                              type: number
+                              example: 30.93
+                            outlet_temperature_bottom:
+                              type: number
+                              example: 36.5
+                            inlet_temperature_middle:
+                              type: number
+                              example: 30.56
+                            outlet_temperature_middle:
+                              type: number
+                              example: 35.79
+                            inlet_temperature_top:
+                              type: number
+                              example: 30.83
+                            outlet_temperature_top:
+                              type: number
+                              example: 86.0
+                        relationships:
+                          type: object
+                          properties:
+                            rack:
+                              type: object
+                              properties:
+                                data:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                      example: 1234
+        400:
+          description: "Rack ID is required"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Rack ID is required"
+        404:
+          description: "Rack ID <ID> doesn't not exists"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Rack with ID 123, doesn't exists"
+        422:
+          description: "Rack ID <ID> must be integer"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Rack ID 12hj must be integer"
+        401:
+          description: Unauthorized Error
 components:
   securitySchemes:
     basicAuth:
