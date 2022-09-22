@@ -12,6 +12,10 @@ app = Flask(__name__)
 conn = sqlite3.connect('data.db')
 db = pd.read_csv('PowerIQData.csv')
 db.to_sql('power', conn, if_exists='replace', index=False)
+
+db = pd.read_csv('sensorsData.csv')
+db.to_sql('sensors', conn, if_exists='replace', index=False)
+
 identity = {
     "data": {
         "type": "identity",
@@ -40,73 +44,46 @@ def get_error_response(error):
         "error": "{ERROR}".format(ERROR=error)
     }
 
-def get_rack_sensors(rack_id):
-    if rack_id == 123:
-        return [
-            {
-                "data": {
-                "type": "rack_sensor_readings",
-                "id": round(datetime.now().timestamp()),
-                "attributes": {
-                    "inlet_temperature_bottom": 30.93,
-                    "outlet_temperature_bottom": 36.5,
-                    "inlet_temperature_middle": 30.56,
-                    "outlet_temperature_middle": 35.79,
-                    "inlet_temperature_top": 30.83,
-                    "outlet_temperature_top": 86
-                },
-                "relationships": {
-                    "rack": {
-                        "data": {
-                            "id": "123"
-                        }
-                    }
-                }
-                }
-            }
-        ]
-    elif rack_id == 1234:
-        return [
-            {
-                "data": {
-                "type": "rack_sensor_readings",
-                "id": round(datetime.now().timestamp()),
-                "attributes": {
-                    "inlet_temperature_bottom": 30.93,
-                    "outlet_temperature_bottom": 36.5,
-                    "inlet_temperature_top": 30.83,
-                    "outlet_temperature_top": 86
-                },
-                "relationships": {
-                    "rack": {
-                        "data": {
-                            "id": "1234"
-                        }
-                    }
-                }
-                }
-            }
-        ]
-    elif rack_id == 12345:
-        return [
-            {
-                "data": {
-                "type": "rack_sensor_readings",
-                "id": round(datetime.now().timestamp()),
-                "attributes": {},
-                "relationships": {
-                    "rack": {
-                        "data": {
-                            "id": "1234"
-                        }
-                    }
-                }
-                }
-            }
-        ]
-    else:
-        raise ValueError("Rack with ID {}, doesn't exists".format(rack_id))
+def get_rack_sensors(piq_id):
+    connection = sqlite3.connect('data.db')
+    cursor = connection.cursor()
+
+    query = "SELECT * FROM sensors WHERE piq_id=?"
+    result = cursor.execute(query, (piq_id,))
+    row = result.fetchone()
+    if not row:
+        raise ValueError("Rack with ID {}, doesn't exists".format(piq_id))
+
+    attributes = {}
+    if row[3]:
+        attributes["inlet_temperature_bottom"] = row[3]
+    if row[4]:
+        attributes["outlet_temperature_bottom"] = row[3]
+    if row[5]:
+        attributes["inlet_temperature_middle"] = row[3]
+    if row[6]:
+        attributes["outlet_temperature_middle"] = row[3]
+    if row[7]:
+        attributes["inlet_temperature_top"] = row[3]
+    if row[8]:
+        attributes["outlet_temperature_top"] = row[3]
     
+    return [
+        {
+            "data": {
+            "type": "rack_sensor_readings",
+            "id": row[0],
+            "attributes": attributes,
+            "relationships": {
+                "rack": {
+                    "data": {
+                        "id": row[1]
+                    }
+                }
+            }
+            }
+        }
+    ]
 
 def auth_required(f):
     @wraps(f)
