@@ -58,15 +58,15 @@ def get_rack_sensors(piq_id):
     if row[3]:
         attributes["inlet_temperature_bottom"] = row[3]
     if row[4]:
-        attributes["outlet_temperature_bottom"] = row[3]
+        attributes["outlet_temperature_bottom"] = row[4]
     if row[5]:
-        attributes["inlet_temperature_middle"] = row[3]
+        attributes["inlet_temperature_middle"] = row[5]
     if row[6]:
-        attributes["outlet_temperature_middle"] = row[3]
+        attributes["outlet_temperature_middle"] = row[6]
     if row[7]:
-        attributes["inlet_temperature_top"] = row[3]
+        attributes["inlet_temperature_top"] = row[7]
     if row[8]:
-        attributes["outlet_temperature_top"] = row[3]
+        attributes["outlet_temperature_top"] = row[8]
     
     return [
         {
