@@ -54,7 +54,16 @@ def get_rack_sensors(piq_id):
     if not row:
         raise ValueError("Rack with ID {}, doesn't exists".format(piq_id))
 
-    attributes = {}
+    
+    attributes = {
+        "inlet_temperature_bottom": None,
+        "outlet_temperature_bottom": None,
+        "inlet_temperature_middle": None,
+        "outlet_temperature_middle": None,
+        "inlet_temperature_top": None,
+        "outlet_temperature_top": None
+    }
+    
     if row[3]:
         attributes["inlet_temperature_bottom"] = row[3]
     if row[4]:
