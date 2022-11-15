@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
   title: DCIM POWERIQ API
-  description: 'Two types of requests will be defined in version 1.0 of the API:  identity requests and monitor requests'
-  version: "1.0"
+  description: 'API version 1.1 supports three types of requests: identity, power monitoring for items, and temperature monitoring for racks.'
+  version: "1.1"
 servers:
 - url: /
 paths:
