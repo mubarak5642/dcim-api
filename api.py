@@ -20,7 +20,7 @@ identity = {
     "data": {
         "type": "identity",
         "attributes": {
-            "api_version" : "1.0",
+            "api_version" : "1.1",
             "make" : "Akamai Data Store",
             "model" : "Akamai Virtual Device"
         }
