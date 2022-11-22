@@ -54,28 +54,26 @@ def get_rack_sensors(piq_id):
     if not row:
         raise ValueError("Rack with ID {}, doesn't exists".format(piq_id))
 
-    
-    attributes = {
-        "inlet_temperature_bottom": None,
-        "outlet_temperature_bottom": None,
-        "inlet_temperature_middle": None,
-        "outlet_temperature_middle": None,
-        "inlet_temperature_top": None,
-        "outlet_temperature_top": None
-    }
-    
+    attributes = {}
+
     if row[3]:
-        attributes["inlet_temperature_bottom"] = row[3]
+        attributes["inlet_temperature_bottom"] = \
+            None if row[3] == 'NA' else row[3]
     if row[4]:
-        attributes["outlet_temperature_bottom"] = row[4]
+        attributes["outlet_temperature_bottom"] = \
+            None if row[4] == 'NA' else row[4]
     if row[5]:
-        attributes["inlet_temperature_middle"] = row[5]
+        attributes["inlet_temperature_middle"] = \
+            None if row[5] == 'NA' else row[5]
     if row[6]:
-        attributes["outlet_temperature_middle"] = row[6]
+        attributes["outlet_temperature_middle"] = \
+            None if row[6] == 'NA' else row[6]
     if row[7]:
-        attributes["inlet_temperature_top"] = row[7]
+        attributes["inlet_temperature_top"] = \
+            None if row[7] == 'NA' else row[7]
     if row[8]:
-        attributes["outlet_temperature_top"] = row[8]
+        attributes["outlet_temperature_top"] = \
+            None if row[8] == 'NA' else row[8]
     
     return [
         {
