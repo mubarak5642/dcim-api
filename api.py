@@ -5,7 +5,6 @@ from flask import request, Response, jsonify, Flask
 import sqlite3
 import pandas as pd
 import base64
-from datetime import datetime
 
 app = Flask(__name__)
 
@@ -16,13 +15,27 @@ db.to_sql('power', conn, if_exists='replace', index=False)
 db = pd.read_csv('sensorsData.csv')
 db.to_sql('sensors', conn, if_exists='replace', index=False)
 
+db = pd.read_csv('coloData.csv')
+db.to_sql('colo_power', conn, if_exists='replace', index=False)
+
 identity = {
     "data": {
         "type": "identity",
         "attributes": {
-            "api_version" : "1.1",
+            "api_version" : "1.0",
             "make" : "Akamai Data Store",
             "model" : "Akamai Virtual Device"
+        }
+    }
+}
+
+identity_power_panel = {
+    "data": {
+        "type": "identity",
+        "attributes": {
+            "api_version": "1.1",
+            "make": "Akamai Data Store",
+            "model": "Akamai Virtual Power Panel"
         }
     }
 }
@@ -54,7 +67,6 @@ def get_rack_sensors(piq_id):
     if not row:
         raise ValueError("Rack with ID {}, doesn't exists".format(piq_id))
 
-    
     attributes = {
         "inlet_temperature_bottom": None,
         "outlet_temperature_bottom": None,
@@ -63,7 +75,7 @@ def get_rack_sensors(piq_id):
         "inlet_temperature_top": None,
         "outlet_temperature_top": None
     }
-    
+
     if row[3]:
         attributes["inlet_temperature_bottom"] = row[3]
     if row[4]:
@@ -76,7 +88,7 @@ def get_rack_sensors(piq_id):
         attributes["inlet_temperature_top"] = row[7]
     if row[8]:
         attributes["outlet_temperature_top"] = row[8]
-    
+
     return [
         {
             "data": {
@@ -116,46 +128,84 @@ def home():
 @auth_required
 def identity_requests():
     return jsonify(identity)
+
+@app.route('/identity/power_panel')
+@auth_required
+def identity_requests_power_panel():
+    return jsonify(identity_power_panel)
     
 @app.route('/monitor/sensor_readings')
 @auth_required  
 def monitor_requests():
     server_id = request.args.get('filter[server_id]')
-    if not server_id:
-        return jsonify({'error': 'IP Address is required'}), 400
+    power_panel_id = request.args.get('filter[power_panel_id]')
+    if not server_id and not power_panel_id:
+        return jsonify(
+            {'message': 'server_id or  power_panel_id is required'}
+        ), 400
 
-    servers = server_id.split(',')
     new_sensor_readings = []
-    connection = sqlite3.connect('data.db')
-    cursor = connection.cursor()
+    if server_id:
+        servers = server_id.split(',')
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
 
-    for server in servers:
-        query = "SELECT * FROM power WHERE ip_addr=?"
-        result = cursor.execute(query, (server.strip(),))
-        row = result.fetchone()
-        
-        if not row:
-            new_sensor_readings.append(
-                {'message': 'Ip address {} not found'.format(server)}
-            )
-            continue
+        for server in servers:
+            query = "SELECT * FROM power WHERE ip_addr=?"
+            result = cursor.execute(query, (server.strip(),))
+            row = result.fetchone()
 
-        new_sensor_readings.append({
-            'data': {
-                'type': 'sensor_readings',
-                'id': row[0],
-                'attributes': {
-                    'active_power_watts': row[3]
-                },
-                'relationships': {
-                    'server': {
-                        'data': {
-                            'id': row[1]
+            if not row:
+                new_sensor_readings.append(
+                    {'message': 'Ip address {} not found'.format(server)}
+                )
+                continue
+
+            new_sensor_readings.append({
+                'data': {
+                    'type': 'sensor_readings',
+                    'id': row[0],
+                    'attributes': {
+                        'active_power_watts': row[3] if row[3] else 0
+                    },
+                    'relationships': {
+                        'server': {
+                            'data': {
+                                'id': row[1]
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+    elif power_panel_id:
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        query = "SELECT * FROM colo_power WHERE power_panel_id=?"
+        result = cursor.execute(query, (power_panel_id.strip(),))
+        row = result.fetchone()
+
+        if not row:
+            new_sensor_readings.append(
+                {'message': f'power_panel_id {power_panel_id} not found'}
+            )
+        else:
+            new_sensor_readings.append({
+                'data': {
+                    'type': 'sensor_readings',
+                    'id': row[0],
+                    'attributes': {
+                        'active_power_watts': row[3] if row[3] else 0
+                    },
+                    'relationships': {
+                        'server': {
+                            'data': {
+                                'id': power_panel_id
+                            }
+                        }
+                    }
+                }
+            })
     
     return jsonify(new_sensor_readings)
 
@@ -166,19 +216,19 @@ def monitor_temperature_requests():
 
     if filter_parameter not in request.args:
         return jsonify(get_error_response("Rack ID is required")), 400
-    
+
     rack_id = request.args.get(filter_parameter)
     if not rack_id:
         return jsonify(get_error_response("Rack ID is required")), 400
-    
-    rack_id = rack_id.strip() 
+
+    rack_id = rack_id.strip()
     try:
         rack_id = int(rack_id)
     except ValueError:
         return jsonify(
             get_error_response("Rack ID {} must be integer".format(rack_id))
         ), 422
-    
+
     try:
         return jsonify(get_rack_sensors(rack_id))
     except ValueError as e:
